@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   title: "PostVideoNow — Post Once. Publish Everywhere.",
   description:
     "Upload your video once and instantly distribute it across 15+ social platforms.",
+  verification: {
+    other: {
+      "tiktok-developers-site-verification": "BA8Q7dY9yCjchidg2o7oz8jN1",
+    },
+  },
 };
 
 export default function RootLayout({
