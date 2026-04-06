@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   "/terms",
   "/privacy",
   "/tiktoksignature",
+  "/tiktoksignature/",
   "/tiktokvns0sPZcTvdC6yVQOlfnXSnuUQjkrnt0.txt",
   "/tiktokVYkpHrLgBACy9L1eZJm8BkAi0vlfRlT4.txt",
   "/api/auth/tiktok",
