@@ -1,8 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const { isSignedIn } = useUser();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -23,6 +27,14 @@ export default function HomePage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  function requireAuth() {
+    if (!isSignedIn) {
+      router.push("/sign-in?redirect_url=" + encodeURIComponent("/"));
+    } else {
+      requireAuth();
+    }
+  }
 
   function handleFile(file: File) {
     if (file && file.type.startsWith("video/")) setFileName(file.name);
@@ -113,7 +125,7 @@ export default function HomePage() {
           </div>
           <div style={{ display:"flex", gap:12, alignItems:"center" }}>
             <Link href="/sign-in" style={{ padding:"9px 20px", borderRadius:10, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:"#8888AA", fontSize:"0.88rem", fontWeight:500, cursor:"pointer", textDecoration:"none" }}>Sign In</Link>
-            <button onClick={() => setModalOpen(true)} className="btn-primary-hover" style={{ padding:"9px 22px", borderRadius:10, border:"none", background:"linear-gradient(135deg,#6C63FF,#8B84FF)", color:"#fff", fontSize:"0.88rem", fontWeight:600, cursor:"pointer", boxShadow:"0 0 24px rgba(108,99,255,0.35)", fontFamily:"inherit" }}>Get Started →</button>
+            <button onClick={() => requireAuth()} className="btn-primary-hover" style={{ padding:"9px 22px", borderRadius:10, border:"none", background:"linear-gradient(135deg,#6C63FF,#8B84FF)", color:"#fff", fontSize:"0.88rem", fontWeight:600, cursor:"pointer", boxShadow:"0 0 24px rgba(108,99,255,0.35)", fontFamily:"inherit" }}>Get Started →</button>
           </div>
         </div>
       </nav>
@@ -134,7 +146,7 @@ export default function HomePage() {
             </h1>
             <p className="fade-up d2" style={{ fontSize:"1.1rem", color:"#8888AA", maxWidth:480, lineHeight:1.7, marginBottom:40 }}>Upload your video once and instantly distribute it across 15+ social platforms. Save hours, reach millions — all from one dashboard.</p>
             <div className="fade-up d3" style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
-              <button onClick={() => setModalOpen(true)} className="btn-primary-hover" style={{ padding:"14px 32px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#6C63FF,#8B84FF)", color:"#fff", fontSize:"1rem", fontWeight:600, cursor:"pointer", boxShadow:"0 0 30px rgba(108,99,255,0.35)", fontFamily:"inherit", display:"flex", alignItems:"center", gap:8, transition:"all 0.25s" }}>
+              <button onClick={() => requireAuth()} className="btn-primary-hover" style={{ padding:"14px 32px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#6C63FF,#8B84FF)", color:"#fff", fontSize:"1rem", fontWeight:600, cursor:"pointer", boxShadow:"0 0 30px rgba(108,99,255,0.35)", fontFamily:"inherit", display:"flex", alignItems:"center", gap:8, transition:"all 0.25s" }}>
                 ☁️ Upload Video Free
               </button>
               <button onClick={() => document.getElementById("platforms")?.scrollIntoView({behavior:"smooth"})} style={{ padding:"14px 32px", borderRadius:12, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:"#8888AA", fontSize:"1rem", fontWeight:500, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:8, transition:"all 0.25s" }}>
@@ -154,7 +166,7 @@ export default function HomePage() {
           {/* Upload Card */}
           <div className="fade-up d3" style={{ position:"relative" }}>
             <div style={{ position:"absolute", inset:-2, borderRadius:22, zIndex:-1, background:"linear-gradient(135deg,#6C63FF,#00D4C8,transparent)", opacity:0.5 }} />
-            <div className="upload-zone" onClick={() => setModalOpen(true)} onDragOver={e=>{e.preventDefault();setDragOver(true)}} onDragLeave={()=>setDragOver(false)} onDrop={e=>{e.preventDefault();setDragOver(false);const f=e.dataTransfer.files[0];if(f){handleFile(f);setModalOpen(true);}}}
+            <div className="upload-zone" onClick={() => requireAuth()} onDragOver={e=>{e.preventDefault();setDragOver(true)}} onDragLeave={()=>setDragOver(false)} onDrop={e=>{e.preventDefault();setDragOver(false);const f=e.dataTransfer.files[0];if(f){handleFile(f);}requireAuth();}}
               style={{ background: dragOver ? "#16163A" : "#111122", borderRadius:20, padding:"48px 40px", textAlign:"center", border:`2px dashed ${dragOver?"#6C63FF":"rgba(108,99,255,0.3)"}`, cursor:"pointer", position:"relative", overflow:"hidden", transition:"all 0.3s" }}>
               <div style={{ width:80, height:80, borderRadius:"50%", margin:"0 auto 24px", background:"linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,212,200,0.1))", border:"1px solid rgba(108,99,255,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"2rem", position:"relative" }}>
                 <span style={{ position:"absolute", inset:-8, borderRadius:"50%", border:"1px solid rgba(108,99,255,0.15)", animation:"spin-slow 8s linear infinite" }} />
@@ -197,7 +209,7 @@ export default function HomePage() {
               <div style={{ fontFamily:"var(--font-syne,sans-serif)", fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:"#5A5A7A", marginBottom:14, paddingBottom:10, borderBottom:"1px solid rgba(255,255,255,0.07)" }}>{group.label}</div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))", gap:12 }}>
                 {group.items.map(p => (
-                  <div key={p.name} onClick={p.active ? () => setModalOpen(true) : undefined}
+                  <div key={p.name} onClick={p.active ? () => requireAuth() : undefined}
                     className={`platform-card ${p.active ? "active-card" : ""}`}
                     style={{ background: p.active ? "rgba(0,212,200,0.04)" : "#111122", border: p.active ? "1px solid rgba(0,212,200,0.4)" : "1px solid rgba(255,255,255,0.07)", borderRadius:16, padding:"22px 18px", display:"flex", flexDirection:"column", alignItems:"center", gap:12, cursor: p.active ? "pointer" : "default", position:"relative", opacity: p.active ? 1 : 0.6 }}>
                     {p.active
@@ -274,7 +286,7 @@ export default function HomePage() {
           <h2 style={{ fontFamily:"var(--font-syne,sans-serif)", fontWeight:800, letterSpacing:"-0.03em", fontSize:"clamp(2.5rem,5vw,4rem)", marginBottom:20, background:"linear-gradient(135deg,#EEEEFF,rgba(238,238,255,0.6))", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>Stop uploading manually.</h2>
           <p style={{ fontSize:"1.05rem", color:"#8888AA", marginBottom:40, lineHeight:1.7 }}>Join thousands of creators saving hours every week. Post to TikTok now — more platforms launching soon.</p>
           <div style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
-            <button onClick={() => setModalOpen(true)} className="btn-primary-hover" style={{ padding:"14px 32px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#6C63FF,#8B84FF)", color:"#fff", fontSize:"1rem", fontWeight:600, cursor:"pointer", boxShadow:"0 0 30px rgba(108,99,255,0.35)", fontFamily:"inherit", display:"flex", alignItems:"center", gap:8, transition:"all 0.25s" }}>☁️ Upload Your First Video</button>
+            <button onClick={() => requireAuth()} className="btn-primary-hover" style={{ padding:"14px 32px", borderRadius:12, border:"none", background:"linear-gradient(135deg,#6C63FF,#8B84FF)", color:"#fff", fontSize:"1rem", fontWeight:600, cursor:"pointer", boxShadow:"0 0 30px rgba(108,99,255,0.35)", fontFamily:"inherit", display:"flex", alignItems:"center", gap:8, transition:"all 0.25s" }}>☁️ Upload Your First Video</button>
             <button style={{ padding:"14px 32px", borderRadius:12, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:"#8888AA", fontSize:"1rem", fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>No credit card required</button>
           </div>
         </div>
