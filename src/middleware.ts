@@ -6,8 +6,21 @@ const isProtectedRoute = createRouteMatcher([
   "/api/auth/tiktok/callback(.*)",
 ]);
 
+// Routes that must be publicly accessible (no auth)
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/terms",
+  "/privacy",
+  "/tiktoksignature",
+  "/tiktokvns0sPZcTvdC6yVQOlfnXSnuUQjkrnt0.txt",
+  "/tiktokVYkpHrLgBACy9L1eZJm8BkAi0vlfRlT4.txt",
+  "/api/auth/tiktok",
+]);
+
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
+  if (!isPublicRoute(req) && isProtectedRoute(req)) {
     await auth.protect();
   }
 });
