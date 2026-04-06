@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PostVideoNow — Post Once. Publish Everywhere.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg:        #07070E;
+      --surface:   #0C0C18;
+      --card:      #111122;
+      --card-hi:   #16163A;
+      --border:    rgba(255,255,255,0.07);
+      --border-hi: rgba(255,255,255,0.15);
+      --accent:    #6C63FF;
+      --accent2:   #00D4C8;
+      --glow:      rgba(108,99,255,0.35);
+      --glow2:     rgba(0,212,200,0.25);
+      --text:      #EEEEFF;
+      --muted:     #5A5A7A;
+      --muted2:    #8888AA;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Figtree', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ─── GRAIN OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+    }
+
+    /* ─── ORBS ─── */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+
+    /* ─── TYPOGRAPHY ─── */
+    .display {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+    }
+    .heading { font-family: 'Syne', sans-serif; font-weight: 700; }
+
+    /* ─── GLASS CARD ─── */
+    .glass {
+      background: rgba(17,17,34,0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    .glass-hi {
+      background: rgba(22,22,58,0.6);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border-hi);
+      border-radius: 20px;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 18px 0;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(7,7,14,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1180px; margin: 0 auto;
+      padding: 0 28px;
+      display: flex; align-items: center; gap: 40px;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+    }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; color: #fff;
+      box-shadow: 0 0 20px var(--glow);
+    }
+    .nav-links { display: flex; gap: 32px; margin-left: auto; }
+    .nav-links a {
+      color: var(--muted2); font-size: 0.9rem; font-weight: 500;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-ctas { display: flex; gap: 12px; align-items: center; }
+    .btn-ghost {
+      padding: 9px 20px; border-radius: 10px; border: 1px solid var(--border-hi);
+      background: transparent; color: var(--muted2); font-size: 0.88rem;
+      font-weight: 500; cursor: pointer; transition: all 0.2s;
+      font-family: 'Figtree', sans-serif;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+    .btn-primary {
+      padding: 9px 22px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, var(--accent), #8B84FF);
+      color: #fff; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+      transition: all 0.25s; box-shadow: 0 0 24px var(--glow);
+      font-family: 'Figtree', sans-serif; letter-spacing: 0.01em;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 40px var(--glow), 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 120px 28px 80px;
+      overflow: hidden;
+    }
+    .hero-inner {
+      max-width: 1180px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 100px;
+      background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3);
+      font-size: 0.78rem; font-weight: 600; color: var(--accent2);
+      letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 28px;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent2); box-shadow: 0 0 8px var(--accent2);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero-title { font-size: clamp(3rem, 6vw, 5.5rem); margin-bottom: 24px; }
+    .hero-title .line1 { display: block; color: var(--text); }
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted2); max-width: 480px;
+      line-height: 1.7; margin-bottom: 40px; font-weight: 400;
+    }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-hero {
+      padding: 14px 32px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, var(--accent), #8B84FF);
+      color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: all 0.25s; box-shadow: 0 0 30px var(--glow);
+      font-family: 'Figtree', sans-serif; display: flex; align-items: center; gap: 8px;
+    }
+    .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 0 50px var(--glow), 0 12px 40px rgba(0,0,0,0.5); }
+    .btn-hero-ghost {
+      padding: 14px 32px; border-radius: 12px;
+      border: 1px solid var(--border-hi); background: transparent;
+      color: var(--muted2); font-size: 1rem; font-weight: 500; cursor: pointer;
+      transition: all 0.25s; font-family: 'Figtree', sans-serif;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-hero-ghost:hover { color: var(--text); border-color: var(--accent); }
+    .hero-stats {
+      display: flex; gap: 32px; margin-top: 48px; padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── UPLOAD CARD (hero right) ─── */
+    .upload-card {
+      position: relative;
+    }
+    .upload-card::before {
+      content: '';
+      position: absolute; inset: -2px; border-radius: 22px; z-index: -1;
+      background: linear-gradient(135deg, var(--accent), var(--accent2), transparent);
+      opacity: 0.5;
+    }
+    .upload-zone {
+      background: var(--card); border-radius: 20px;
+      padding: 48px 40px; text-align: center;
+      border: 2px dashed rgba(108,99,255,0.3);
+      cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .upload-zone::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: 18px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--card-hi);
+      transform: scale(1.01);
+    }
+    .upload-icon {
+      width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,212,200,0.1));
+      border: 1px solid rgba(108,99,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; position: relative;
+    }
+    .upload-icon::before {
+      content: '';
+      position: absolute; inset: -8px; border-radius: 50%;
+      border: 1px solid rgba(108,99,255,0.15);
+      animation: spin-slow 8s linear infinite;
+    }
+    .upload-icon::after {
+      content: '';
+      position: absolute; inset: -16px; border-radius: 50%;
+      border: 1px dashed rgba(108,99,255,0.08);
+      animation: spin-slow 14s linear infinite reverse;
+    }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+    .upload-title {
+      font-family: 'Syne', sans-serif; font-size: 1.2rem;
+      font-weight: 700; margin-bottom: 8px;
+    }
+    .upload-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+    .upload-formats {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .format-tag {
+      padding: 4px 10px; border-radius: 6px; font-size: 0.72rem;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--muted2); font-weight: 500;
+    }
+    .upload-btn {
+      width: 100%; padding: 14px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, var(--accent), #8B84FF);
+      color: #fff; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: all 0.25s; font-family: 'Figtree', sans-serif;
+      box-shadow: 0 0 24px var(--glow);
+    }
+    .upload-btn:hover { box-shadow: 0 0 40px var(--glow); transform: translateY(-1px); }
+
+    /* Selected platforms preview */
+    .platform-preview {
+      display: flex; gap: 8px; align-items: center; margin-top: 20px;
+      padding: 14px 18px; border-radius: 12px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    }
+    .platform-mini {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+    }
+    .platform-preview-label { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+
+    /* ─── SECTION ─── */
+    .section { position: relative; padding: 100px 28px; }
+    .section-inner { max-width: 1180px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent2); margin-bottom: 16px;
+    }
+    .section-title { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 16px; }
+    .section-sub { font-size: 1rem; color: var(--muted2); max-width: 520px; line-height: 1.7; }
+
+    /* ─── PLATFORM GRID ─── */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px; margin-top: 56px;
+    }
+    .platform-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 22px 18px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;
+      text-decoration: none; color: var(--text);
+    }
+    .platform-card::before {
+      content: '';
+      position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.08) 0%, transparent 70%);
+    }
+    .platform-card:hover { border-color: var(--border-hi); transform: translateY(-3px); }
+    .platform-card:hover::before { opacity: 1; }
+    .platform-card.active {
+      border-color: rgba(0,212,200,0.4);
+      background: rgba(0,212,200,0.04);
+      box-shadow: 0 0 30px rgba(0,212,200,0.12), inset 0 0 30px rgba(0,212,200,0.04);
+    }
+    .platform-card.active::before {
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,200,0.1) 0%, transparent 70%);
+      opacity: 1;
+    }
+    .platform-icon-wrap {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+      position: relative;
+    }
+    .platform-name { font-size: 0.82rem; font-weight: 600; text-align: center; }
+    .platform-cat { font-size: 0.68rem; color: var(--muted); text-align: center; }
+    .active-badge {
+      position: absolute; top: 10px; right: 10px;
+      padding: 3px 8px; border-radius: 100px; font-size: 0.65rem; font-weight: 700;
+      background: rgba(0,212,200,0.15); color: var(--accent2);
+      border: 1px solid rgba(0,212,200,0.3); letter-spacing: 0.04em;
+    }
+    .soon-badge {
+      position: absolute; top: 10px; right: 10px;
+      padding: 3px 8px; border-radius: 100px; font-size: 0.65rem; font-weight: 600;
+      background: rgba(255,255,255,0.04); color: var(--muted);
+      border: 1px solid var(--border); letter-spacing: 0.04em;
+    }
+    .platform-card.coming-soon { opacity: 0.6; }
+    .platform-card.coming-soon:hover { opacity: 0.8; }
+
+    /* Category headers */
+    .cat-section { margin-bottom: 40px; }
+    .cat-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    /* ─── FEATURES ─── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px;
+    }
+    .feature-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+      padding: 36px 30px; transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transform: scaleX(0); transform-origin: left; transition: transform 0.4s;
+    }
+    .feature-card:hover { border-color: var(--border-hi); transform: translateY(-4px); }
+    .feature-card:hover::after { transform: scaleX(1); }
+    .feature-num {
+      font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; opacity: 0.3; line-height: 1;
+      margin-bottom: 20px;
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
+    .feature-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+    .feature-text { font-size: 0.9rem; color: var(--muted2); line-height: 1.7; }
+
+    /* ─── HOW IT WORKS ─── */
+    .steps { display: flex; flex-direction: column; gap: 0; margin-top: 60px; }
+    .step {
+      display: grid; grid-template-columns: 60px 1fr; gap: 24px;
+      padding: 28px 0; border-bottom: 1px solid var(--border); align-items: start;
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--accent);
+    }
+    .step-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .step-text { font-size: 0.9rem; color: var(--muted2); line-height: 1.7; }
+
+    /* ─── CTA ─── */
+    #cta {
+      padding: 100px 28px; position: relative; overflow: hidden;
+    }
+    .cta-inner {
+      max-width: 720px; margin: 0 auto; text-align: center; position: relative; z-index: 1;
+    }
+    .cta-title { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 20px; }
+    .cta-sub { font-size: 1.05rem; color: var(--muted2); margin-bottom: 40px; line-height: 1.7; }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; }
+    #cta::before {
+      content: '';
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(108,99,255,0.15) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border); padding: 48px 28px;
+    }
+    .footer-inner {
+      max-width: 1180px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.82rem; color: var(--muted); }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(7,7,14,0.85); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border-hi);
+      border-radius: 24px; max-width: 680px; width: 100%;
+      padding: 48px; position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--muted2); font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .modal-sub { font-size: 0.9rem; color: var(--muted2); margin-bottom: 32px; }
+    .modal-step-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent2); margin-bottom: 12px;
+    }
+    .modal-dropzone {
+      border: 2px dashed rgba(108,99,255,0.3); border-radius: 16px;
+      padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s;
+      margin-bottom: 24px; position: relative; overflow: hidden;
+    }
+    .modal-dropzone:hover, .modal-dropzone.drag-over {
+      border-color: var(--accent); background: rgba(108,99,255,0.04);
+    }
+    .modal-dropzone-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .modal-dropzone-text { font-weight: 600; margin-bottom: 4px; }
+    .modal-dropzone-sub { font-size: 0.82rem; color: var(--muted); }
+    .modal-section { margin-bottom: 28px; }
+    .modal-section-title {
+      font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700;
+      margin-bottom: 14px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .platform-checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .platform-check {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .platform-check:hover { border-color: var(--border-hi); background: rgba(255,255,255,0.02); }
+    .platform-check.checked { border-color: rgba(108,99,255,0.5); background: rgba(108,99,255,0.06); }
+    .platform-check.disabled { opacity: 0.4; cursor: not-allowed; }
+    .check-box {
+      width: 18px; height: 18px; border-radius: 5px; border: 1px solid var(--border-hi);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: all 0.2s; font-size: 0.7rem;
+    }
+    .platform-check.checked .check-box {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .check-platform-icon { font-size: 1.2rem; }
+    .check-platform-name { font-size: 0.85rem; font-weight: 600; }
+    .check-platform-soon { font-size: 0.7rem; color: var(--muted); }
+    .modal-textarea {
+      width: 100%; border-radius: 12px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03); color: var(--text);
+      padding: 14px 16px; font-family: 'Figtree', sans-serif; font-size: 0.9rem;
+      resize: vertical; min-height: 100px; outline: none; transition: border-color 0.2s;
+    }
+    .modal-textarea:focus { border-color: rgba(108,99,255,0.5); }
+    .modal-textarea::placeholder { color: var(--muted); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+    .char-count { font-size: 0.78rem; color: var(--muted); margin-top: 6px; text-align: right; }
+
+    /* Progress bar inside modal */
+    .progress-steps {
+      display: flex; gap: 8px; margin-bottom: 36px;
+    }
+    .progress-step {
+      height: 3px; flex: 1; border-radius: 3px; background: var(--border);
+      transition: background 0.4s;
+    }
+    .progress-step.done { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .progress-step.active { background: var(--accent); animation: progress-pulse 1.5s infinite; }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ─── NOTIFICATION TOAST ─── */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 999;
+      padding: 16px 24px; border-radius: 14px;
+      background: var(--card); border: 1px solid rgba(0,212,200,0.3);
+      box-shadow: 0 0 30px rgba(0,212,200,0.2), 0 20px 60px rgba(0,0,0,0.5);
+      display: flex; align-items: center; gap: 12px;
+      transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      max-width: 360px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-icon { font-size: 1.4rem; }
+    .toast-text { font-size: 0.88rem; font-weight: 600; }
+    .toast-sub { font-size: 0.78rem; color: var(--muted2); margin-top: 2px; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 28px;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--card-hi); border-radius: 3px; }
+
+    /* ─── ANIMATIONS ─── */
+    .fade-up {
+      opacity: 0; transform: translateY(30px);
+      animation: fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes fade-up {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .platform-checks { grid-template-columns: 1fr; }
+      .modal { padding: 28px 20px; }
+      .hero-stats { flex-wrap: wrap; gap: 20px; }
+    }
+
+    /* Tiktok glow pulse */
+    .tiktok-glow {
+      animation: tiktok-pulse 3s ease-in-out infinite;
+    }
+    @keyframes tiktok-pulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(0,212,200,0.12), inset 0 0 30px rgba(0,212,200,0.04); }
+      50% { box-shadow: 0 0 50px rgba(0,212,200,0.25), inset 0 0 40px rgba(0,212,200,0.08); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-mark">PV</div>
+        PostVideoNow
+      </a>
+      <div class="nav-links">
+        <a href="#platforms">Platforms</a>
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div class="nav-ctas" style="margin-left:auto;">
+        <button class="btn-ghost">Sign In</button>
+        <button class="btn-primary" onclick="openModal()">Get Started →</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <section id="hero">
+    <!-- Background orbs -->
+    <div class="orb" style="width:600px;height:600px;background:radial-gradient(ellipse,rgba(108,99,255,0.18),transparent 70%);top:-100px;left:-200px;"></div>
+    <div class="orb" style="width:400px;height:400px;background:radial-gradient(ellipse,rgba(0,212,200,0.12),transparent 70%);bottom:0;right:-100px;"></div>
+
+    <div class="hero-inner" style="position:relative;z-index:1;">
+      <div>
+        <div class="hero-badge fade-up">
+          <div class="hero-badge-dot"></div>
+          Now Live — TikTok Publishing
+        </div>
+        <h1 class="display hero-title fade-up delay-1">
+          <span class="line1">POST ONCE.</span>
+          <span class="line2">PUBLISH<br>EVERYWHERE.</span>
+        </h1>
+        <p class="hero-sub fade-up delay-2">
+          Upload your video once and instantly distribute it across 15+ social platforms. Save hours, reach millions — all from one elegant dashboard.
+        </p>
+        <div class="hero-ctas fade-up delay-3">
+          <button class="btn-hero" onclick="openModal()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            Upload Video Free
+          </button>
+          <button class="btn-hero-ghost" onclick="document.getElementById('platforms').scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            See Platforms
+          </button>
+        </div>
+        <div class="hero-stats fade-up delay-4">
+          <div>
+            <div class="stat-num">15+</div>
+            <div class="stat-label">Platforms supported</div>
+          </div>
+          <div>
+            <div class="stat-num">1-click</div>
+            <div class="stat-label">Cross-posting</div>
+          </div>
+          <div>
+            <div class="stat-num">∞</div>
+            <div class="stat-label">Reach potential</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload card -->
+      <div class="upload-card fade-up delay-3">
+        <div class="upload-zone" id="heroDropzone" onclick="openModal()"
+             ondragover="e=>{e.preventDefault();this.classList.add('drag-over')}"
+             ondragleave="this.classList.remove('drag-over')">
+          <div class="upload-icon">☁️</div>
+          <div class="upload-title">Drop your video here</div>
+          <div class="upload-sub">or click to browse files</div>
+          <div class="upload-formats">
+            <span class="format-tag">MP4</span>
+            <span class="format-tag">MOV</span>
+            <span class="format-tag">AVI</span>
+            <span class="format-tag">WebM</span>
+            <span class="format-tag">up to 4GB</span>
+          </div>
+          <button class="upload-btn">Choose Video File</button>
+        </div>
+        <div class="platform-preview">
+          <div class="platform-mini" style="background:rgba(0,0,0,0.4);border-radius:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+          </div>
+          <span style="font-size:0.82rem;font-weight:600;">TikTok</span>
+          <span style="font-size:0.75rem;color:var(--accent2);font-weight:600;margin-left:4px;">● Ready</span>
+          <span class="platform-preview-label">+14 coming soon</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ PLATFORMS ═══ -->
+  <section class="section" id="platforms">
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(ellipse,rgba(0,212,200,0.08),transparent 70%);top:0;right:-100px;"></div>
+    <div class="section-inner">
+      <div class="section-label">All Platforms</div>
+      <h2 class="heading section-title fade-up">Your entire audience,<br>one upload away.</h2>
+      <p class="section-sub fade-up delay-1">TikTok is live now. We're rapidly building out every major platform — subscribe to get notified when your favourite goes live.</p>
+
+      <!-- SHORT-FORM VIDEO -->
+      <div class="cat-section" style="margin-top:56px;">
+        <div class="cat-label">Short-Form Video</div>
+        <div class="cat-grid">
+          <!-- TikTok — ACTIVE -->
+          <div class="platform-card active tiktok-glow" onclick="openModal()">
+            <div class="active-badge">Live ✓</div>
+            <div class="platform-icon-wrap" style="background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.1);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+            </div>
+            <div class="platform-name">TikTok</div>
+            <div class="platform-cat">Short-form video</div>
+          </div>
+          <!-- Instagram -->
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="white" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="white"/></svg>
+            </div>
+            <div class="platform-name">Instagram</div>
+            <div class="platform-cat">Reels & Stories</div>
+          </div>
+          <!-- Snapchat -->
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#FFFC00;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#000"><path d="M12 2C7.5 2 5 5 5 8.5c0 1.5.3 2.4.3 2.4s-.8.3-1.3.6c-.5.3-.5.8-.2 1.1.3.2 1.5.5 2.2.6.2.5.4 1 .7 1.3-.9.3-2.2.8-2.2 1.5 0 .6.8.9 1.5 1 .5.1.8.2 1 .4.2.2.3.6.3 1 0 .8 1 .8 1.5.5.5-.3 1.2-.7 2.2-.7s1.7.4 2.2.7c.5.3 1.5.3 1.5-.5 0-.4.1-.8.3-1 .2-.2.5-.3 1-.4.7-.1 1.5-.4 1.5-1 0-.7-1.3-1.2-2.2-1.5.3-.3.5-.8.7-1.3.7-.1 1.9-.4 2.2-.6.3-.3.3-.8-.2-1.1-.5-.3-1.3-.6-1.3-.6s.3-.9.3-2.4C19 5 16.5 2 12 2z"/></svg>
+            </div>
+            <div class="platform-name">Snapchat</div>
+            <div class="platform-cat">Spotlight</div>
+          </div>
+          <!-- YT Shorts -->
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#FF0000;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.7 12 3.7 12 3.7s-7.5 0-9.4.4A3 3 0 00.5 6.2C.1 8.1.1 12 .1 12s0 3.9.4 5.8a3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1c.4-1.9.4-5.8.4-5.8s0-3.9-.4-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+            </div>
+            <div class="platform-name">YT Shorts</div>
+            <div class="platform-cat">YouTube Shorts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOCIAL & POSTS -->
+      <div class="cat-section">
+        <div class="cat-label">Social & Posts</div>
+        <div class="cat-grid">
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#1877F2;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+            </div>
+            <div class="platform-name">Facebook</div>
+            <div class="platform-cat">Feed & Reels</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#000;border:1px solid rgba(255,255,255,0.15);">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="platform-name">Twitter / X</div>
+            <div class="platform-cat">Posts & Video</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#0A66C2;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+            </div>
+            <div class="platform-name">LinkedIn</div>
+            <div class="platform-cat">Video Posts</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#FF4500;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="0"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.5 10.5c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5.22-.5.5-.5zm-2.5-3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-6 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 3.5c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5.22-.5.5-.5zm9.42 3.42C15.5 17.33 13.86 18 12 18s-3.5-.67-4.42-2.08a.5.5 0 01.84-.54C9.07 16.43 10.47 17 12 17s2.93-.57 3.58-1.62a.5.5 0 01.84.54z"/></svg>
+            </div>
+            <div class="platform-name">Reddit</div>
+            <div class="platform-cat">Subreddits</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#E60023;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M12 0a12 12 0 100 24A12 12 0 0012 0zm0 2a10 10 0 018.9 5.4c-.4-.1-.8-.1-1.2-.1-1.8 0-3.2.9-4.1 2.3-.9-1.4-2.3-2.3-4.1-2.3-.2 0-.4 0-.6.1C10.1 4 11 2 12 2zm-7.5 9.5c.1-2.6 1.2-4.8 2.9-6.3.3.1.6.1.9.1 1.5 0 2.7.8 3.4 2.1-.8 1-1.3 2.3-1.3 3.7 0 .2 0 .4.1.6-1.9.5-3.5 1.8-4.5 3.6-.9-.9-1.5-2.3-1.5-3.8zm7.5 10.5c-2.6 0-4.8-1.3-6.2-3.2 1.1-1.9 3-3.3 5.2-3.6 0 .2.1.4.1.6 0 1.1.8 2 1.9 2s1.9-.9 1.9-2c0-.2 0-.4.1-.6 2.2.4 4 1.7 5.2 3.6C17.8 20.7 15.6 22 13 22zm8.5-6c-1-1.7-2.6-3.1-4.5-3.6.1-.2.1-.4.1-.6 0-1.4-.5-2.7-1.3-3.7.7-1.3 2-2.1 3.4-2.1.3 0 .7.1 1 .2 1.6 1.4 2.6 3.6 2.6 6-.1 1.4-.5 2.8-1.3 3.8z"/></svg>
+            </div>
+            <div class="platform-name">Pinterest</div>
+            <div class="platform-cat">Idea Pins</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#563ACC;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M23 5.5c-.5-2.4-2.3-4-4.8-4.2C15.8 1 13.4 1 12 1s-3.8 0-6.2.3C3.3 1.5 1.5 3.1 1 5.5.5 7.5.5 12 .5 12s0 4.5.5 6.5c.5 2.4 2.3 4 4.8 4.2C8.2 23 10.6 23 12 23s3.8 0 6.2-.3c2.5-.2 4.3-1.8 4.8-4.2.5-2 .5-6.5.5-6.5s0-4.5-.5-6.5zm-13 9V9.5l7 2.5-7 2.5z"/></svg>
+            </div>
+            <div class="platform-name">Mastodon</div>
+            <div class="platform-cat">Fediverse</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#000;border:1px solid rgba(255,255,255,0.15);">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 7h-2.5v1.5c0 .83.67 1.5 1.5 1.5H17v2h-1.5C13.57 14 12 12.43 12 10.5V9H10V7h2V5h2v2h2.5v2z"/></svg>
+            </div>
+            <div class="platform-name">Threads</div>
+            <div class="platform-cat">Meta Threads</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIDEO & STREAMING -->
+      <div class="cat-section">
+        <div class="cat-label">Video & Streaming</div>
+        <div class="cat-grid">
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#FF0000;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.7 12 3.7 12 3.7s-7.5 0-9.4.4A3 3 0 00.5 6.2C.1 8.1.1 12 .1 12s0 3.9.4 5.8a3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1c.4-1.9.4-5.8.4-5.8s0-3.9-.4-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+            </div>
+            <div class="platform-name">YouTube</div>
+            <div class="platform-cat">Long-form video</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#9146FF;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+            </div>
+            <div class="platform-name">Twitch</div>
+            <div class="platform-cat">Clips & VODs</div>
+          </div>
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#1AB7EA;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm4.441 16.892l-4.47-2.661a.748.748 0 01-.369-.642V8.25a.75.75 0 011.5 0v4.878l4.098 2.44a.75.75 0 01-.759 1.324z"/></svg>
+            </div>
+            <div class="platform-name">Vimeo</div>
+            <div class="platform-cat">Pro video</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUBLISHING -->
+      <div class="cat-section">
+        <div class="cat-label">Publishing</div>
+        <div class="cat-grid" style="max-width:180px;">
+          <div class="platform-card coming-soon">
+            <div class="soon-badge">Soon</div>
+            <div class="platform-icon-wrap" style="background:#FF6719;border:none;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V13.648H22.539V10.812H1.46zM1.46 16.082V18.918H22.539V16.082H1.46z"/></svg>
+            </div>
+            <div class="platform-name">Substack</div>
+            <div class="platform-cat">Newsletter video</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section class="section" id="how">
+    <div class="section-inner">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;">
+        <div>
+          <div class="section-label">How it works</div>
+          <h2 class="heading section-title">Three steps to everywhere.</h2>
+          <p class="section-sub">No more logging into each platform. No more re-uploading. Just upload, select, and post.</p>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-title">Upload your video</div>
+              <div class="step-text">Drag and drop any video file up to 4GB. Supports MP4, MOV, AVI, WebM, and more. We store it securely and optimize it automatically.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-title">Select your platforms</div>
+              <div class="step-text">Choose from your connected social accounts. Each platform gets its own optimized version — right aspect ratio, right length, right format.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-title">Post or schedule</div>
+              <div class="step-text">Hit post to go live now, or schedule for peak engagement hours. Track performance across all platforms from a single dashboard.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section class="section" id="features">
+    <div class="orb" style="width:400px;height:400px;background:radial-gradient(ellipse,rgba(108,99,255,0.1),transparent 70%);bottom:0;left:0;"></div>
+    <div class="section-inner">
+      <div class="section-label">Why PostVideoNow</div>
+      <h2 class="heading section-title">Built for serious creators.</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-num">01</div>
+          <div class="feature-icon" style="background:rgba(108,99,255,0.12);border:1px solid rgba(108,99,255,0.2);">⚡</div>
+          <div class="feature-title">Upload Once</div>
+          <div class="feature-text">Stop wasting hours re-uploading the same video across 15 different apps. One upload reaches your entire audience simultaneously.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-num">02</div>
+          <div class="feature-icon" style="background:rgba(0,212,200,0.1);border:1px solid rgba(0,212,200,0.2);">🎯</div>
+          <div class="feature-title">Platform-Optimized</div>
+          <div class="feature-text">Our engine automatically reformats your video for each platform — correct aspect ratios, bitrates, captions, and lengths. No manual editing.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-num">03</div>
+          <div class="feature-icon" style="background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.2);">📅</div>
+          <div class="feature-title">Schedule & Automate</div>
+          <div class="feature-text">Plan your entire content calendar in advance. Schedule posts for peak engagement times per platform. Your audience, on autopilot.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section id="cta">
+    <div class="cta-inner">
+      <div class="section-label" style="text-align:center;">Start free today</div>
+      <h2 class="display cta-title">
+        <span style="background:linear-gradient(135deg,var(--text),rgba(238,238,255,0.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Stop uploading manually.</span>
+      </h2>
+      <p class="cta-sub">Join thousands of creators saving hours every week. Post to TikTok now — more platforms launching soon.</p>
+      <div class="cta-actions">
+        <button class="btn-hero" onclick="openModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Upload Your First Video
+        </button>
+        <button class="btn-hero-ghost">No credit card required</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="footer-inner">
+      <a href="#" class="logo">
+        <div class="logo-mark" style="width:28px;height:28px;border-radius:8px;font-size:0.72rem;">PV</div>
+        PostVideoNow
+      </a>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Blog</a>
+        <a href="#">Support</a>
+        <a href="#">Roadmap</a>
+      </div>
+      <div class="footer-copy">© 2026 PostVideoNow. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- ═══ UPLOAD MODAL ═══ -->
+  <div class="modal-overlay" id="uploadModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-title">Post Your Video</div>
+      <div class="modal-sub">Upload once, post everywhere — starting with TikTok.</div>
+
+      <!-- Steps progress -->
+      <div class="progress-steps">
+        <div class="progress-step done" id="ps1"></div>
+        <div class="progress-step" id="ps2"></div>
+        <div class="progress-step" id="ps3"></div>
+      </div>
+
+      <!-- Step 1: Drop zone -->
+      <div class="modal-section" id="stepDrop">
+        <div class="modal-step-label">Step 1 — Choose video</div>
+        <div class="modal-dropzone" id="modalDropzone"
+             onclick="document.getElementById('videoFileInput').click()"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+          <div class="modal-dropzone-icon" id="dropIcon">🎬</div>
+          <div class="modal-dropzone-text" id="dropText">Drag & drop your video here</div>
+          <div class="modal-dropzone-sub" id="dropSub">or click to browse — MP4, MOV, AVI, WebM up to 4GB</div>
+        </div>
+        <input type="file" id="videoFileInput" accept="video/*" style="display:none" onchange="handleFileSelect(event)" />
+      </div>
+
+      <!-- Step 2: Select platforms -->
+      <div class="modal-section" id="stepPlatforms">
+        <div class="modal-section-title">Step 2 — Select platforms</div>
+        <div class="platform-checks">
+          <label class="platform-check checked" id="chk-tiktok">
+            <div class="check-box">✓</div>
+            <div class="check-platform-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+            </div>
+            <div>
+              <div class="check-platform-name">TikTok</div>
+              <div class="check-platform-soon" style="color:var(--accent2);">● Connected</div>
+            </div>
+            <input type="checkbox" checked style="display:none" onclick="toggleCheck('chk-tiktok',event)"/>
+          </label>
+          <label class="platform-check disabled">
+            <div class="check-box" style="opacity:0.3;"></div>
+            <div class="check-platform-icon">📸</div>
+            <div>
+              <div class="check-platform-name">Instagram</div>
+              <div class="check-platform-soon">Coming Soon</div>
+            </div>
+          </label>
+          <label class="platform-check disabled">
+            <div class="check-box" style="opacity:0.3;"></div>
+            <div class="check-platform-icon">▶️</div>
+            <div>
+              <div class="check-platform-name">YouTube</div>
+              <div class="check-platform-soon">Coming Soon</div>
+            </div>
+          </label>
+          <label class="platform-check disabled">
+            <div class="check-box" style="opacity:0.3;"></div>
+            <div class="check-platform-icon">🐦</div>
+            <div>
+              <div class="check-platform-name">Twitter / X</div>
+              <div class="check-platform-soon">Coming Soon</div>
+            </div>
+          </label>
+          <label class="platform-check disabled">
+            <div class="check-box" style="opacity:0.3;"></div>
+            <div class="check-platform-icon">💼</div>
+            <div>
+              <div class="check-platform-name">LinkedIn</div>
+              <div class="check-platform-soon">Coming Soon</div>
+            </div>
+          </label>
+          <label class="platform-check disabled">
+            <div class="check-box" style="opacity:0.3;"></div>
+            <div class="check-platform-icon">👻</div>
+            <div>
+              <div class="check-platform-name">Snapchat</div>
+              <div class="check-platform-soon">Coming Soon</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 3: Caption -->
+      <div class="modal-section" id="stepCaption">
+        <div class="modal-section-title">Step 3 — Caption & hashtags</div>
+        <textarea class="modal-textarea" id="captionText" placeholder="Write a caption for your video... Add hashtags like #viral #trending" maxlength="2200" oninput="updateCharCount()"></textarea>
+        <div class="char-count"><span id="charNum">0</span> / 2200</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" onclick="handlePost()" id="postBtn" style="padding:11px 28px;font-size:0.95rem;">
+          Post to TikTok →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">🎉</div>
+    <div>
+      <div class="toast-text">Posted to TikTok!</div>
+      <div class="toast-sub">Your video is now live and processing.</div>
+    </div>
+  </div>
+
+  <script>
+    // ─── NAV SCROLL ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // ─── MODAL ───
+    function openModal() {
+      document.getElementById('uploadModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('uploadModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ─── DRAG & DROP ───
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('modalDropzone').classList.add('drag-over');
+    }
+    function handleDragLeave(e) {
+      document.getElementById('modalDropzone').classList.remove('drag-over');
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('modalDropzone').classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('video/')) {
+        showFileReady(file);
+      }
+    }
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) showFileReady(file);
+    }
+    function showFileReady(file) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+      document.getElementById('dropIcon').textContent = '✅';
+      document.getElementById('dropText').textContent = file.name;
+      document.getElementById('dropSub').textContent = `${sizeMB} MB — Ready to post`;
+      document.getElementById('modalDropzone').style.borderColor = 'var(--accent2)';
+      document.getElementById('modalDropzone').style.background = 'rgba(0,212,200,0.04)';
+      // advance progress
+      document.getElementById('ps1').classList.add('done');
+      document.getElementById('ps2').classList.add('active');
+    }
+
+    // ─── CHAR COUNT ───
+    function updateCharCount() {
+      const len = document.getElementById('captionText').value.length;
+      document.getElementById('charNum').textContent = len;
+      if (len > 1800) {
+        document.getElementById('charNum').style.color = '#FF4D4D';
+      } else {
+        document.getElementById('charNum').style.color = 'var(--muted)';
+      }
+      // advance progress
+      document.getElementById('ps2').classList.add('done');
+      document.getElementById('ps2').classList.remove('active');
+      document.getElementById('ps3').classList.add('active');
+    }
+
+    // ─── TOGGLE CHECK ───
+    function toggleCheck(id, e) {
+      if (id === 'chk-tiktok') { e && e.stopPropagation(); return; } // TikTok always on
+      const el = document.getElementById(id);
+      el.classList.toggle('checked');
+    }
+
+    // ─── POST ───
+    function handlePost() {
+      const btn = document.getElementById('postBtn');
+      btn.textContent = 'Posting...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      // Simulate API call
+      setTimeout(() => {
+        closeModal();
+        btn.textContent = 'Post to TikTok →';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        showToast();
+      }, 2000);
+    }
+
+    // ─── TOAST ───
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 5000);
+    }
+
+    // ─── SCROLL REVEAL ───
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.feature-card, .platform-card, .step').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+
+    // Stagger platform cards
+    document.querySelectorAll('.platform-card').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.04}s`;
+    });
+
+    // Hero drop zone
+    const heroDropzone = document.getElementById('heroDropzone');
+    heroDropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      heroDropzone.classList.add('drag-over');
+    });
+    heroDropzone.addEventListener('dragleave', () => heroDropzone.classList.remove('drag-over'));
+    heroDropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      heroDropzone.classList.remove('drag-over');
+      openModal();
+    });
+  </script>
+</body>
+</html>
