@@ -2,7 +2,19 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Privacy Policy — PostVideoNow",
-  description: "Privacy Policy for PostVideoNow",
+  description:
+    "Read the Privacy Policy for PostVideoNow. Learn how we collect, use, and protect your data when you use our multi-platform video publishing service.",
+  alternates: {
+    canonical: "/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy — PostVideoNow",
+    description:
+      "Read the Privacy Policy for PostVideoNow. Learn how we collect, use, and protect your data when you use our multi-platform video publishing service.",
+    url: "https://www.postvideonow.com/privacy",
+    siteName: "PostVideoNow",
+    type: "website",
+  },
 };
 
 export default function PrivacyPage() {
