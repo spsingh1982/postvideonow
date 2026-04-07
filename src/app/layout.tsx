@@ -18,7 +18,36 @@ const figtree = Figtree({
 export const metadata: Metadata = {
   title: "PostVideoNow — Post Once. Publish Everywhere.",
   description:
-    "Upload your video once and instantly distribute it across 15+ social platforms.",
+    "Upload your video once and instantly distribute it across 15+ social platforms including TikTok, Instagram, YouTube, LinkedIn, and more.",
+  metadataBase: new URL("https://www.postvideonow.com"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "PostVideoNow — Post Once. Publish Everywhere.",
+    description:
+      "Upload your video once and instantly distribute it across 15+ social platforms.",
+    url: "https://www.postvideonow.com",
+    siteName: "PostVideoNow",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PostVideoNow — Post Once. Publish Everywhere.",
+    description:
+      "Upload your video once and instantly distribute it across 15+ social platforms.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
   verification: {
     other: {
       "tiktok-developers-site-verification": "BA8Q7dY9yCjchidg2o7oz8jN1",
