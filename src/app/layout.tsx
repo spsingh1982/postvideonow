@@ -20,9 +20,6 @@ export const metadata: Metadata = {
   description:
     "Upload your video once and instantly distribute it across 15+ social platforms including TikTok, Instagram, YouTube, LinkedIn, and more.",
   metadataBase: new URL("https://www.postvideonow.com"),
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     title: "PostVideoNow — Post Once. Publish Everywhere.",
     description:

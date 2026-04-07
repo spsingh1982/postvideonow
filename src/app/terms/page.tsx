@@ -2,7 +2,19 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Terms of Service — PostVideoNow",
-  description: "Terms of Service for PostVideoNow",
+  description:
+    "Read the Terms of Service for PostVideoNow — the platform that lets you upload a video once and publish it to 15+ social media platforms.",
+  alternates: {
+    canonical: "/terms",
+  },
+  openGraph: {
+    title: "Terms of Service — PostVideoNow",
+    description:
+      "Read the Terms of Service for PostVideoNow — the platform that lets you upload a video once and publish it to 15+ social media platforms.",
+    url: "https://www.postvideonow.com/terms",
+    siteName: "PostVideoNow",
+    type: "website",
+  },
 };
 
 export default function TermsPage() {
